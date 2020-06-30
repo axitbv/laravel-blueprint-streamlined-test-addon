@@ -1,0 +1,54 @@
+{
+    "name": "axitbv/laravel-blueprint-streamlined-test-addon",
+    "description": "Swap Blueprint's TestGenerator with my own *too fancy* and *too specific*, *streamlined* tests for API Resource Controllers",
+    "keywords": [
+        "axitbv",
+        "laravel-blueprint-streamlined-test-addon"
+    ],
+    "homepage": "https://github.com/axitbv/laravel-blueprint-streamlined-test-addon",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Joost Jacobs",
+            "email": "j.jacobs@xit.nl",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "illuminate/support": "^6.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^4.0",
+        "phpunit/phpunit": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Axitbv\\LaravelBlueprintStreamlinedTestAddon\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Axitbv\\LaravelBlueprintStreamlinedTestAddon\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Axitbv\\LaravelBlueprintStreamlinedTestAddon\\LaravelBlueprintStreamlinedTestAddonServiceProvider"
+            ],
+            "aliases": {
+                "LaravelBlueprintStreamlinedTestAddon": "Axitbv\\LaravelBlueprintStreamlinedTestAddon\\LaravelBlueprintStreamlinedTestAddonFacade"
+            }
+        }
+    }
+}
