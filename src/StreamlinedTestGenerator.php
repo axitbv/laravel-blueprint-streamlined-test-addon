@@ -1,6 +1,6 @@
 <?php
 
-namespace Axitbv\LaravelBlueprintStreamlinedTestAddon;
+namespace Axitbv\BlueprintStreamlinedTestAddon;
 
 use Blueprint\Blueprint;
 use Blueprint\Contracts\Generator;
@@ -17,7 +17,7 @@ use Blueprint\Models\Statements\SessionStatement;
 use Blueprint\Models\Statements\ValidateStatement;
 use Illuminate\Support\Str;
 
-class StreamlinedTestGenerator
+class StreamlinedTestGenerator implements Generator
 {
     const TESTS_VIEW = 1;
     const TESTS_REDIRECT = 2;

@@ -1,7 +1,8 @@
 <?php
 
-namespace Axitbv\LaravelBlueprintStreamlinedTestAddon;
+namespace Axitbv\BlueprintStreamlinedTestAddon;
 
+use Blueprint\Blueprint;
 use Illuminate\Support\ServiceProvider;
 
 class BlueprintStreamlinedTestAddonServiceProvider extends ServiceProvider

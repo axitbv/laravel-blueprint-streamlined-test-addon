@@ -1,9 +1,9 @@
 <?php
 
-namespace Axitbv\LaravelBlueprintStreamlinedTestAddon\Tests;
+namespace Axitbv\BlueprintStreamlinedTestAddon\Tests;
 
 use Orchestra\Testbench\TestCase;
-use Axitbv\LaravelBlueprintStreamlinedTestAddon\BlueprintStreamlinedTestAddonServiceProvider;
+use Axitbv\BlueprintStreamlinedTestAddon\BlueprintStreamlinedTestAddonServiceProvider;
 
 class ExampleTest extends TestCase
 {
