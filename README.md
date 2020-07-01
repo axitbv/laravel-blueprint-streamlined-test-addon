@@ -5,7 +5,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://scrutinizer-ci.com/g/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Total Downloads](https://img.shields.io/packagist/dt/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://packagist.org/packages/axitbv/laravel-blueprint-streamlined-test-addon)
 
-Swap Blueprint's TestGenerator with my own *too fancy* and *too specific*, *streamlined* tests for API Resource Controllers
+Swaps Blueprint's TestGenerator with my own [*too fancy* and *too specific*, *streamlined* tests](https://github.com/laravel-shift/blueprint/pull/220) for API Resource Controllers. Big thanks to Jason McCreary for allowing Blueprint to swap Generators.
 
 ## Installation
 
@@ -40,7 +40,7 @@ controllers:
     resource: api
 ```
 
-This `resource: api` shorthand expands to generate an API resource controller, form requests, resources and resource collections. Yet, instead of the broken tests that currently come out of the Box with Blueprint, it will provide you with a very opinionated, yet working testsuite for those controllers, with 100% code coverage.
+This `resource: api` shorthand expands to generate an API resource controller, form requests, resources and resource collections. Yet, instead of the broken tests that currently come out of the box with Blueprint, it will provide you with a *very opinionated*, yet *working* testsuite for the geneated code, with 100% code coverage.
 
 ``` php
 php artisan blueprint:build
