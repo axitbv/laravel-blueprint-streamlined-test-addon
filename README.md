@@ -5,7 +5,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://scrutinizer-ci.com/g/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Total Downloads](https://img.shields.io/packagist/dt/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://packagist.org/packages/axitbv/laravel-blueprint-streamlined-test-addon)
 
-Swaps Blueprint's TestGenerator with my own [*too fancy* and *too specific*, *streamlined* tests](https://github.com/laravel-shift/blueprint/pull/220) for API Resource Controllers. Big thanks to Jason McCreary for allowing Blueprint to swap Generators.
+Swaps Blueprint's TestGenerator with my own [*too fancy* and *too specific*, *streamlined* tests](https://github.com/laravel-shift/blueprint/pull/220) for API Resource Controllers.
 
 ## Installation
 
@@ -167,8 +167,13 @@ If you discover any security related issues, please email j.jacobs@xit.nl instea
 
 ## Credits
 
-- [Joost Jacobs](https://github.com/axitbv)
+- [Joost Jacobs](https://github.com/axit-joost)
 - [All Contributors](../../contributors)
+
+## Big Thank You To
+
+- [Jason McCreary](https://github.com/jasonmccreary) for creating [Blueprint](https://github.com/laravel-shift/blueprint), the constructive feedback, your vision and allowing Blueprint to swap Generators.
+- [Daniel Mason](https://github.com/dmason30) for inspiring me with [Blueprint Pest Addon](https://github.com/fidum/laravel-blueprint-pestphp-addon) that generates PestPHP test code
 
 ## License
 
