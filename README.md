@@ -1,24 +1,34 @@
-# Very short description of the package
+# Laravel Blueprint Streamlined Tests Addon
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://packagist.org/packages/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Build Status](https://img.shields.io/travis/axitbv/laravel-blueprint-streamlined-test-addon/master.svg?style=flat-square)](https://travis-ci.org/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Quality Score](https://img.shields.io/scrutinizer/g/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://scrutinizer-ci.com/g/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Total Downloads](https://img.shields.io/packagist/dt/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://packagist.org/packages/axitbv/laravel-blueprint-streamlined-test-addon)
 
-This is where your description should go. Try and limit it to a paragraph or two, and maybe throw in a mention of what PSRs you support to avoid any confusion with users and contributors.
+Swap Blueprint's TestGenerator with my own *too fancy* and *too specific*, *streamlined* tests for API Resource Controllers
 
 ## Installation
 
 You can install the package via composer:
 
 ```bash
-composer require axitbv/laravel-blueprint-streamlined-test-addon
+composer require laravel-shift/blueprint axitbv/laravel-blueprint-streamlined-test-addon
 ```
 
 ## Usage
 
+Create your blueprint draft.yaml as usual. In order to generate the streamlined tests that this package provides, be sure to include the `resource: api` shorthand in your `controllers:` section:
+
+```yaml
+controllers:
+  YourController:
+    resource: api
+```
+
+This `resource: api` shorthand expands to generate an API resource controller. Instead of the broken tests that currently come out of the Box, it will provide you with a very opinionated, yet working testsuite for those controllers.
+
 ``` php
-// Usage description here
+php artisan blueprint:build
 ```
 
 ### Testing
