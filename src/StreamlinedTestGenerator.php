@@ -396,8 +396,6 @@ class StreamlinedTestGenerator implements Generator
                 } elseif ($statement instanceof QueryStatement) {
                     $this->addRefreshDatabaseTrait($controller);
 
-                    $setup['data'][] =
-
                     if (Blueprint::isLaravel8OrHigher()) {
                         $setup['data'][] = sprintf('$%s = %s::factory()->times(3)->create();', Str::plural($variable), $model);
                     } else {
