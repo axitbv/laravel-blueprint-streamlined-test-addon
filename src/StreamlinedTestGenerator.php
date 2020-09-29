@@ -44,7 +44,7 @@ class StreamlinedTestGenerator implements Generator
     {
         $output = [];
 
-        $stub = $this->files->get(STUBS_PATH.'/test/class.stub');
+        $stub = $this->files->get(STUBS_PATH.'/test.class.stub');
 
         $this->registerModels($tree);
 
@@ -80,11 +80,11 @@ class StreamlinedTestGenerator implements Generator
         string $stub,
         Controller $controller
     ) {
-        $stub = str_replace('DummyNamespace', 'Tests\\Feature\\'.Blueprint::relativeNamespace($controller->fullyQualifiedNamespace()), $stub);
-        $stub = str_replace('DummyController', '\\'.$controller->fullyQualifiedClassName(), $stub);
-        $stub = str_replace('DummyClass', $controller->className().'Test', $stub);
-        $stub = str_replace('// test cases...', $this->buildTestCases($controller), $stub);
-        $stub = str_replace('// imports...', $this->buildImports($controller), $stub);
+        $stub = str_replace('{{ namespace }}', 'Tests\\Feature\\'.Blueprint::relativeNamespace($controller->fullyQualifiedNamespace()), $stub);
+        $stub = str_replace('{{ namespacedClass }}', '\\'.$controller->fullyQualifiedClassName(), $stub);
+        $stub = str_replace('{{ class }}', $controller->className().'Test', $stub);
+        $stub = str_replace('{{ body }}', $this->buildTestCases($controller), $stub);
+        $stub = str_replace('{{ imports }}', $this->buildImports($controller), $stub);
 
         return $stub;
     }
