@@ -29,7 +29,8 @@ class StreamlinedTestGenerator implements Generator
     /** @var \Illuminate\Contracts\Filesystem\Filesystem */
     private $files;
 
-    private $models = [];
+    /** @var Tree */
+    private $tree;
 
     private $imports = [];
     private $stubs = [];
@@ -42,14 +43,14 @@ class StreamlinedTestGenerator implements Generator
 
     public function output(Tree $tree): array
     {
+        $this->tree = $tree;
+
         $output = [];
 
-        $stub = $this->files->get(STUBS_PATH.'/test.class.stub');
-
-        $this->registerModels($tree);
+        $stub = $this->files->stub('test.class.stub');
 
         /** @var \Blueprint\Models\Controller $controller */
-        foreach ($tree['controllers'] as $controller) {
+        foreach ($tree->controllers() as $controller) {
             $path = $this->getPath($controller);
 
             if (! $this->files->exists(dirname($path))) {
@@ -176,7 +177,7 @@ class StreamlinedTestGenerator implements Generator
                             }
 
                             /** @var \Blueprint\Models\Model $model */
-                            $local_model = $this->modelForContext($qualifier);
+                            $local_model = $this->tree->modelForContext($qualifier);
                             if (! is_null($local_model) && $local_model->hasColumn($column)) {
                                 $faker = FactoryGenerator::fakerData($local_model->column($column)->name()) ?? FactoryGenerator::fakerDataType($local_model->column($column)->dataType());
                             } else {
@@ -600,23 +601,6 @@ END;
     private function buildLines($lines)
     {
         return str_pad(' ', 8).implode(PHP_EOL.str_pad(' ', 8), $lines);
-    }
-
-    private function modelForContext(string $context)
-    {
-        if (isset($this->models[Str::studly($context)])) {
-            return $this->models[Str::studly($context)];
-        }
-
-        $matches = array_filter(array_keys($this->models), function ($key) use (
-            $context
-        ) {
-            return Str::endsWith($key, '/'.Str::studly($context));
-        });
-
-        if (count($matches) === 1) {
-            return $this->models[$matches[0]];
-        }
     }
 
     private function splitField($field)
