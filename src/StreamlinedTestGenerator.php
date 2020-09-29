@@ -194,9 +194,17 @@ class StreamlinedTestGenerator implements Generator
 
                             if ($controller->isApiResource()) {
                                 if ($name === 'update') {
-                                    $setup['data'][] = sprintf('$update = factory(%s)->make();', $local_model->name().'::class');
+                                    if (Blueprint::isLaravel8OrHigher()) {
+                                        $setup['data'][] = sprintf('$update = %s::factory()->make();', $local_model->name());
+                                    } else {
+                                        $setup['data'][] = sprintf('$update = factory(%s)->make();', $local_model->name().'::class');
+                                    }
                                 } else {
-                                    $setup['data'][] = sprintf('$%s = factory(%s)->make();', $data, $local_model->name().'::class');
+                                    if (Blueprint::isLaravel8OrHigher()) {
+                                        $setup['data'][] = sprintf('$%s = %s::factory()->make();', $data, $local_model->name());
+                                    } else {
+                                        $setup['data'][] = sprintf('$%s = factory(%s)->make();', $data, $local_model->name().'::class');
+                                    }
                                 }
                             } else {
                                 $setup['data'][] = sprintf('$%s = $this->faker->%s;', $data, $faker);
@@ -369,16 +377,32 @@ class StreamlinedTestGenerator implements Generator
                             $assertions['generic'][] = '$this->assertDatabaseHas('.Str::camel(Str::plural($model)).', [ /* ... */ ]);';
                         }
                     } elseif ($statement->operation() === 'find') {
-                        $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        if (Blueprint::isLaravel8OrHigher()) {
+                            $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                        } else {
+                            $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        }
                     } elseif ($statement->operation() === 'delete') {
                         $tested_bits |= self::TESTS_DELETE;
-                        $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+
+                        if (Blueprint::isLaravel8OrHigher()) {
+                            $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                        } else {
+                            $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        }
+
                         $assertions['generic'][] = sprintf('$this->assertDeleted($%s);', $variable);
                     }
                 } elseif ($statement instanceof QueryStatement) {
                     $this->addRefreshDatabaseTrait($controller);
 
-                    $setup['data'][] = sprintf('$%s = factory(%s::class, 3)->create();', Str::plural($variable), $model);
+                    $setup['data'][] =
+
+                    if (Blueprint::isLaravel8OrHigher()) {
+                        $setup['data'][] = sprintf('$%s = %s::factory()->times(3)->create();', Str::plural($variable), $model);
+                    } else {
+                        $setup['data'][] = sprintf('$%s = factory(%s::class, 3)->create();', Str::plural($variable), $model);
+                    }
 
                     $this->addImport($controller, config('blueprint.namespace').'\\'.$this->determineModel($controller->prefix(), $statement->model()));
                 }
