@@ -12,6 +12,11 @@ class BlueprintStreamlinedTestAddonServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/config.php',
+            'blueprint'
+        );
+
         $this->app->extend(Blueprint::class, function (Blueprint $blueprint, $app) {
             $blueprint->swapGenerator(
                 \Blueprint\Generators\TestGenerator::class,
@@ -20,4 +25,5 @@ class BlueprintStreamlinedTestAddonServiceProvider extends ServiceProvider
 
             return $blueprint;
         });
-    }}
+    }
+}
