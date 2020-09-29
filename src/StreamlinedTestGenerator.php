@@ -456,7 +456,7 @@ class StreamlinedTestGenerator implements Generator
     private function testCaseStub()
     {
         if (empty($this->stubs['test-case'])) {
-            $this->stubs['test-case'] = $this->files->get(STUBS_PATH.'/test/case.stub');
+            $this->stubs['test-case'] = $this->files->get(STUBS_PATH.'/test.case.stub');
         }
 
         return $this->stubs['test-case'];
