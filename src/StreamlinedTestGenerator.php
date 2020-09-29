@@ -115,7 +115,11 @@ class StreamlinedTestGenerator implements Generator
             $variable = Str::camel($context);
 
             if (in_array($name, ['edit', 'update', 'show', 'destroy'])) {
-                $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                if (Blueprint::isLaravel8OrHigher()) {
+                    $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                } else {
+                    $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                }
             }
 
             foreach ($statements as $statement) {
