@@ -114,6 +114,10 @@ class StreamlinedTestGenerator implements Generator
             $context = Str::singular($controller->prefix());
             $variable = Str::camel($context);
 
+            $modelNamespace = config('blueprint.models_namespace')
+                ? config('blueprint.namespace').'\\'.config('blueprint.models_namespace')
+                : config('blueprint.namespace');
+
             if (in_array($name, ['edit', 'update', 'show', 'destroy'])) {
                 if (Blueprint::isLaravel8OrHigher()) {
                     $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
