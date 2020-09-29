@@ -15,6 +15,7 @@ use Blueprint\Models\Statements\RespondStatement;
 use Blueprint\Models\Statements\SendStatement;
 use Blueprint\Models\Statements\SessionStatement;
 use Blueprint\Models\Statements\ValidateStatement;
+use Blueprint\Tree;
 use Illuminate\Support\Str;
 
 class StreamlinedTestGenerator implements Generator
@@ -39,7 +40,7 @@ class StreamlinedTestGenerator implements Generator
         $this->files = $files;
     }
 
-    public function output(array $tree): array
+    public function output(Tree $tree): array
     {
         $output = [];
 
@@ -51,7 +52,7 @@ class StreamlinedTestGenerator implements Generator
         foreach ($tree['controllers'] as $controller) {
             $path = $this->getPath($controller);
 
-            if (!$this->files->exists(dirname($path))) {
+            if (! $this->files->exists(dirname($path))) {
                 $this->files->makeDirectory(dirname($path), 0755, true);
             }
 
@@ -176,7 +177,7 @@ class StreamlinedTestGenerator implements Generator
 
                             /** @var \Blueprint\Models\Model $model */
                             $local_model = $this->modelForContext($qualifier);
-                            if (!is_null($local_model) && $local_model->hasColumn($column)) {
+                            if (! is_null($local_model) && $local_model->hasColumn($column)) {
                                 $faker = FactoryGenerator::fakerData($local_model->column($column)->name()) ?? FactoryGenerator::fakerDataType($local_model->column($column)->dataType());
                             } else {
                                 $faker = 'word';
@@ -287,7 +288,6 @@ class StreamlinedTestGenerator implements Generator
                         $view_assertions[] = sprintf('$response->assertViewHas(\'%s\');', $data);
                     }
 
-
                     array_unshift($assertions['response'], ...$view_assertions);
                 } elseif ($statement instanceof RedirectStatement) {
                     $tested_bits |= self::TESTS_REDIRECT;
@@ -335,7 +335,7 @@ class StreamlinedTestGenerator implements Generator
                     if ($statement->operation() === 'save') {
                         $tested_bits |= self::TESTS_SAVE;
 
-                        if ($request_data && !$controller->isApiResource()) {
+                        if ($request_data && ! $controller->isApiResource()) {
                             $indent = str_pad(' ', 12);
                             $plural = Str::plural($variable);
                             $assertion = sprintf('$%s = %s::query()', $plural, $model);
@@ -382,7 +382,7 @@ class StreamlinedTestGenerator implements Generator
             }
             $call .= ')';
 
-            if ($request_data && !$controller->isApiResource()) {
+            if ($request_data && ! $controller->isApiResource()) {
                 $call .= ', [';
                 $call .= PHP_EOL;
                 foreach ($request_data as $key => $datum) {
@@ -608,8 +608,7 @@ END;
             return $this->models[Str::studly($context)];
         }
 
-        $matches = array_filter(array_keys($this->models), function ($key) use
-        (
+        $matches = array_filter(array_keys($this->models), function ($key) use (
             $context
         ) {
             return Str::endsWith($key, '/'.Str::studly($context));
@@ -618,8 +617,6 @@ END;
         if (count($matches) === 1) {
             return $this->models[$matches[0]];
         }
-
-        return null;
     }
 
     private function registerModels(array $tree)
