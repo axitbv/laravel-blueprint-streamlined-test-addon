@@ -425,8 +425,8 @@ class StreamlinedTestGenerator implements Generator
             $body .= PHP_EOL.PHP_EOL;
             $body .= implode(PHP_EOL.PHP_EOL, array_map([$this, 'buildLines'], array_filter($assertions)));
 
-            $test_case = str_replace('dummy_test_case', $this->buildTestCaseName($name, $tested_bits), $test_case);
-            $test_case = str_replace('// ...', trim($body), $test_case);
+            $test_case = str_replace('{{ method }}', $this->buildTestCaseName($name, $tested_bits), $test_case);
+            $test_case = str_replace('{{ body }}', trim($body), $test_case);
 
             $test_cases .= PHP_EOL.$test_case.PHP_EOL;
         }
