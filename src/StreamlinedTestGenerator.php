@@ -619,11 +619,6 @@ END;
         }
     }
 
-    private function registerModels(array $tree)
-    {
-        $this->models = array_merge($tree['cache'] ?? [], $tree['models'] ?? []);
-    }
-
     private function splitField($field)
     {
         if (Str::contains($field, '.')) {
