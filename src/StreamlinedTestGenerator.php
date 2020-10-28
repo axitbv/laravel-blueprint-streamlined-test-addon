@@ -15,6 +15,7 @@ use Blueprint\Models\Statements\RespondStatement;
 use Blueprint\Models\Statements\SendStatement;
 use Blueprint\Models\Statements\SessionStatement;
 use Blueprint\Models\Statements\ValidateStatement;
+use Blueprint\Tree;
 use Illuminate\Support\Str;
 
 class StreamlinedTestGenerator implements Generator
@@ -28,7 +29,8 @@ class StreamlinedTestGenerator implements Generator
     /** @var \Illuminate\Contracts\Filesystem\Filesystem */
     private $files;
 
-    private $models = [];
+    /** @var Tree */
+    private $tree;
 
     private $imports = [];
     private $stubs = [];
@@ -39,19 +41,19 @@ class StreamlinedTestGenerator implements Generator
         $this->files = $files;
     }
 
-    public function output(array $tree): array
+    public function output(Tree $tree): array
     {
+        $this->tree = $tree;
+
         $output = [];
 
-        $stub = $this->files->get(STUBS_PATH.'/test/class.stub');
-
-        $this->registerModels($tree);
+        $stub = $this->files->stub('test.class.stub');
 
         /** @var \Blueprint\Models\Controller $controller */
-        foreach ($tree['controllers'] as $controller) {
+        foreach ($tree->controllers() as $controller) {
             $path = $this->getPath($controller);
 
-            if (!$this->files->exists(dirname($path))) {
+            if (! $this->files->exists(dirname($path))) {
                 $this->files->makeDirectory(dirname($path), 0755, true);
             }
 
@@ -79,11 +81,11 @@ class StreamlinedTestGenerator implements Generator
         string $stub,
         Controller $controller
     ) {
-        $stub = str_replace('DummyNamespace', 'Tests\\Feature\\'.Blueprint::relativeNamespace($controller->fullyQualifiedNamespace()), $stub);
-        $stub = str_replace('DummyController', '\\'.$controller->fullyQualifiedClassName(), $stub);
-        $stub = str_replace('DummyClass', $controller->className().'Test', $stub);
-        $stub = str_replace('// test cases...', $this->buildTestCases($controller), $stub);
-        $stub = str_replace('// imports...', $this->buildImports($controller), $stub);
+        $stub = str_replace('{{ namespace }}', 'Tests\\Feature\\'.Blueprint::relativeNamespace($controller->fullyQualifiedNamespace()), $stub);
+        $stub = str_replace('{{ namespacedClass }}', '\\'.$controller->fullyQualifiedClassName(), $stub);
+        $stub = str_replace('{{ class }}', $controller->className().'Test', $stub);
+        $stub = str_replace('{{ body }}', $this->buildTestCases($controller), $stub);
+        $stub = str_replace('{{ imports }}', $this->buildImports($controller), $stub);
 
         return $stub;
     }
@@ -112,8 +114,16 @@ class StreamlinedTestGenerator implements Generator
             $context = Str::singular($controller->prefix());
             $variable = Str::camel($context);
 
+            $modelNamespace = config('blueprint.models_namespace')
+                ? config('blueprint.namespace').'\\'.config('blueprint.models_namespace')
+                : config('blueprint.namespace');
+
             if (in_array($name, ['edit', 'update', 'show', 'destroy'])) {
-                $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                if (Blueprint::isLaravel8OrHigher()) {
+                    $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                } else {
+                    $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                }
             }
 
             foreach ($statements as $statement) {
@@ -175,8 +185,8 @@ class StreamlinedTestGenerator implements Generator
                             }
 
                             /** @var \Blueprint\Models\Model $model */
-                            $local_model = $this->modelForContext($qualifier);
-                            if (!is_null($local_model) && $local_model->hasColumn($column)) {
+                            $local_model = $this->tree->modelForContext($qualifier);
+                            if (! is_null($local_model) && $local_model->hasColumn($column)) {
                                 $faker = FactoryGenerator::fakerData($local_model->column($column)->name()) ?? FactoryGenerator::fakerDataType($local_model->column($column)->dataType());
                             } else {
                                 $faker = 'word';
@@ -184,9 +194,17 @@ class StreamlinedTestGenerator implements Generator
 
                             if ($controller->isApiResource()) {
                                 if ($name === 'update') {
-                                    $setup['data'][] = sprintf('$update = factory(%s)->make();', $local_model->name().'::class');
+                                    if (Blueprint::isLaravel8OrHigher()) {
+                                        $setup['data'][] = sprintf('$update = %s::factory()->make();', $local_model->name());
+                                    } else {
+                                        $setup['data'][] = sprintf('$update = factory(%s)->make();', $local_model->name().'::class');
+                                    }
                                 } else {
-                                    $setup['data'][] = sprintf('$%s = factory(%s)->make();', $data, $local_model->name().'::class');
+                                    if (Blueprint::isLaravel8OrHigher()) {
+                                        $setup['data'][] = sprintf('$%s = %s::factory()->make();', $data, $local_model->name());
+                                    } else {
+                                        $setup['data'][] = sprintf('$%s = factory(%s)->make();', $data, $local_model->name().'::class');
+                                    }
                                 }
                             } else {
                                 $setup['data'][] = sprintf('$%s = $this->faker->%s;', $data, $faker);
@@ -287,7 +305,6 @@ class StreamlinedTestGenerator implements Generator
                         $view_assertions[] = sprintf('$response->assertViewHas(\'%s\');', $data);
                     }
 
-
                     array_unshift($assertions['response'], ...$view_assertions);
                 } elseif ($statement instanceof RedirectStatement) {
                     $tested_bits |= self::TESTS_REDIRECT;
@@ -335,7 +352,7 @@ class StreamlinedTestGenerator implements Generator
                     if ($statement->operation() === 'save') {
                         $tested_bits |= self::TESTS_SAVE;
 
-                        if ($request_data && !$controller->isApiResource()) {
+                        if ($request_data && ! $controller->isApiResource()) {
                             $indent = str_pad(' ', 12);
                             $plural = Str::plural($variable);
                             $assertion = sprintf('$%s = %s::query()', $plural, $model);
@@ -360,16 +377,30 @@ class StreamlinedTestGenerator implements Generator
                             $assertions['generic'][] = '$this->assertDatabaseHas('.Str::camel(Str::plural($model)).', [ /* ... */ ]);';
                         }
                     } elseif ($statement->operation() === 'find') {
-                        $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        if (Blueprint::isLaravel8OrHigher()) {
+                            $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                        } else {
+                            $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        }
                     } elseif ($statement->operation() === 'delete') {
                         $tested_bits |= self::TESTS_DELETE;
-                        $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+
+                        if (Blueprint::isLaravel8OrHigher()) {
+                            $setup['data'][] = sprintf('$%s = %s::factory()->create();', $variable, $model);
+                        } else {
+                            $setup['data'][] = sprintf('$%s = factory(%s::class)->create();', $variable, $model);
+                        }
+
                         $assertions['generic'][] = sprintf('$this->assertDeleted($%s);', $variable);
                     }
                 } elseif ($statement instanceof QueryStatement) {
                     $this->addRefreshDatabaseTrait($controller);
 
-                    $setup['data'][] = sprintf('$%s = factory(%s::class, 3)->create();', Str::plural($variable), $model);
+                    if (Blueprint::isLaravel8OrHigher()) {
+                        $setup['data'][] = sprintf('$%s = %s::factory()->times(3)->create();', Str::plural($variable), $model);
+                    } else {
+                        $setup['data'][] = sprintf('$%s = factory(%s::class, 3)->create();', Str::plural($variable), $model);
+                    }
 
                     $this->addImport($controller, config('blueprint.namespace').'\\'.$this->determineModel($controller->prefix(), $statement->model()));
                 }
@@ -382,7 +413,7 @@ class StreamlinedTestGenerator implements Generator
             }
             $call .= ')';
 
-            if ($request_data && !$controller->isApiResource()) {
+            if ($request_data && ! $controller->isApiResource()) {
                 $call .= ', [';
                 $call .= PHP_EOL;
                 foreach ($request_data as $key => $datum) {
@@ -424,8 +455,8 @@ class StreamlinedTestGenerator implements Generator
             $body .= PHP_EOL.PHP_EOL;
             $body .= implode(PHP_EOL.PHP_EOL, array_map([$this, 'buildLines'], array_filter($assertions)));
 
-            $test_case = str_replace('dummy_test_case', $this->buildTestCaseName($name, $tested_bits), $test_case);
-            $test_case = str_replace('// ...', trim($body), $test_case);
+            $test_case = str_replace('{{ method }}', $this->buildTestCaseName($name, $tested_bits), $test_case);
+            $test_case = str_replace('{{ body }}', trim($body), $test_case);
 
             $test_cases .= PHP_EOL.$test_case.PHP_EOL;
         }
@@ -455,7 +486,7 @@ class StreamlinedTestGenerator implements Generator
     private function testCaseStub()
     {
         if (empty($this->stubs['test-case'])) {
-            $this->stubs['test-case'] = $this->files->get(STUBS_PATH.'/test/case.stub');
+            $this->stubs['test-case'] = $this->files->get(STUBS_PATH.'/test.case.stub');
         }
 
         return $this->stubs['test-case'];
@@ -600,31 +631,6 @@ END;
     private function buildLines($lines)
     {
         return str_pad(' ', 8).implode(PHP_EOL.str_pad(' ', 8), $lines);
-    }
-
-    private function modelForContext(string $context)
-    {
-        if (isset($this->models[Str::studly($context)])) {
-            return $this->models[Str::studly($context)];
-        }
-
-        $matches = array_filter(array_keys($this->models), function ($key) use
-        (
-            $context
-        ) {
-            return Str::endsWith($key, '/'.Str::studly($context));
-        });
-
-        if (count($matches) === 1) {
-            return $this->models[$matches[0]];
-        }
-
-        return null;
-    }
-
-    private function registerModels(array $tree)
-    {
-        $this->models = array_merge($tree['cache'] ?? [], $tree['models'] ?? []);
     }
 
     private function splitField($field)

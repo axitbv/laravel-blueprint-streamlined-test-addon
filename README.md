@@ -5,7 +5,7 @@
 [![Quality Score](https://img.shields.io/scrutinizer/g/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://scrutinizer-ci.com/g/axitbv/laravel-blueprint-streamlined-test-addon)
 [![Total Downloads](https://img.shields.io/packagist/dt/axitbv/laravel-blueprint-streamlined-test-addon.svg?style=flat-square)](https://packagist.org/packages/axitbv/laravel-blueprint-streamlined-test-addon)
 
-Swaps Blueprint's TestGenerator with my own [*too fancy* and *too specific*, *streamlined* tests](https://github.com/laravel-shift/blueprint/pull/220) for API Resource Controllers.
+Swaps Blueprint's TestGenerator with my own [streamlined tests](https://github.com/laravel-shift/blueprint/pull/220) for API Resource Controllers.
 
 ## Installation
 
@@ -69,7 +69,7 @@ Which will yield:
 
 Then, either run `php artisan test`:
 ```shell script
-❯ php artisan test                                                            
+❯ php artisan test
 
    PASS  Tests\Unit\ExampleTest
   ✓ basic test
